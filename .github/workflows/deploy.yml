@@ -21,7 +21,7 @@ jobs:
           wget https://github.com/flat35hd99/mdBook/releases/download/v0.0.20/mdbook-v0.0.20-x86_64-unknown-linux-gnu.tar.gz
           tar -xvf mdbook-v0.0.20-x86_64-unknown-linux-gnu.tar.gz
 
-      - run: ./mdbook-v0.0.20-x86_64-unknown-linux-gnu/mdbook build
+      - run: ./mdbook build
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
