@@ -1,6 +1,8 @@
-[book]
-authors = ["flat35hd99"]
-language = "en"
-multilingual = false
-src = "src"
-title = "Learn and practice of Molecular dynamics simulation step by step"
+[language.en]
+name = "English"
+
+[language.ja]
+name = "日本語"
+title = "なんかの本"
+description = "何の役にも立たない本"
+authors = ["Ruin0x11"]
