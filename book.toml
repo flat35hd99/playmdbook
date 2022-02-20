@@ -1,8 +1,17 @@
+[book]
+language = "ja"
+
+[output.html]
+site-url = "/playmdbook/"
+
 [language.en]
 name = "English"
+title = "Book something"
+description = "The book useless"
+authors = ["anony"]
 
 [language.ja]
 name = "日本語"
 title = "なんかの本"
 description = "何の役にも立たない本"
-authors = ["Ruin0x11"]
+authors = ["anony"]
