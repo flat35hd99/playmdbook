@@ -108,9 +108,12 @@ function playground_text(playground) {
 
         let text = playground_text(code_block);
         let classes = code_block.querySelector('code').classList;
-        let has_2018 = classes.contains("edition2018");
-        let edition = has_2018 ? "2018" : "2015";
-
+        let edition = "2015";
+        if(classes.contains("edition2018")) {
+            edition = "2018";
+        } else if(classes.contains("edition2021")) {
+            edition = "2021";
+        }
         var params = {
             version: "stable",
             optimize: "0",
@@ -133,7 +136,15 @@ function playground_text(playground) {
             body: JSON.stringify(params)
         })
         .then(response => response.json())
-        .then(response => result_block.innerText = response.result)
+        .then(response => {
+            if (response.result.trim() === '') {
+                result_block.innerText = "No output";
+                result_block.classList.add("result-no-output");
+            } else {
+                result_block.innerText = response.result;
+                result_block.classList.remove("result-no-output");
+            }
+        })
         .catch(error => result_block.innerText = "Playground Communication: " + error.message);
     }
 
@@ -151,12 +162,13 @@ function playground_text(playground) {
     if (window.ace) {
         // language-rust class needs to be removed for editable
         // blocks or highlightjs will capture events
-        Array
-            .from(document.querySelectorAll('code.editable'))
+        code_nodes
+            .filter(function (node) {return node.classList.contains("editable"); })
             .forEach(function (block) { block.classList.remove('language-rust'); });
 
         Array
-            .from(document.querySelectorAll('code:not(.editable)'))
+        code_nodes
+            .filter(function (node) {return !node.classList.contains("editable"); })
             .forEach(function (block) { hljs.highlightBlock(block); });
     } else {
         code_nodes.forEach(function (block) { hljs.highlightBlock(block); });
@@ -410,6 +422,89 @@ function playground_text(playground) {
                 break;
         }
     });
+})();
+
+(function languages() {
+    var languageToggleButton = document.getElementById('language-toggle');
+    var languagePopup = document.getElementById('language-list');
+
+    if (languageToggleButton !== null) {
+        function showLanguages() {
+            languagePopup.style.display = 'block';
+            languageToggleButton.setAttribute('aria-expanded', true);
+        }
+
+        function hideLanguages() {
+            languagePopup.style.display = 'none';
+            languageToggleButton.setAttribute('aria-expanded', false);
+            languageToggleButton.focus();
+        }
+
+        function set_language(language) {
+            console.log("Set language " + language)
+        }
+
+        languageToggleButton.addEventListener('click', function () {
+            if (languagePopup.style.display === 'block') {
+                hideLanguages();
+            } else {
+                showLanguages();
+            }
+        });
+
+        languagePopup.addEventListener('click', function (e) {
+            var language = e.target.id || e.target.parentElement.id;
+            set_language(language);
+        });
+
+        languagePopup.addEventListener('focusout', function(e) {
+            // e.relatedTarget is null in Safari and Firefox on macOS (see workaround below)
+            if (!!e.relatedTarget && !languageToggleButton.contains(e.relatedTarget) && !languagePopup.contains(e.relatedTarget)) {
+                hideLanguages();
+            }
+        });
+
+        // Should not be needed, but it works around an issue on macOS & iOS: https://github.com/rust-lang/mdBook/issues/628
+        document.addEventListener('click', function(e) {
+            if (languagePopup.style.display === 'block' && !languageToggleButton.contains(e.target) && !languagePopup.contains(e.target)) {
+                hideLanguages();
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) { return; }
+            if (!languagePopup.contains(e.target)) { return; }
+
+            switch (e.key) {
+                case 'Escape':
+                    e.preventDefault();
+                    hideLanguages();
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    var li = document.activeElement.parentElement;
+                    if (li && li.previousElementSibling) {
+                        li.previousElementSibling.querySelector('button').focus();
+                    }
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    var li = document.activeElement.parentElement;
+                    if (li && li.nextElementSibling) {
+                        li.nextElementSibling.querySelector('button').focus();
+                    }
+                    break;
+                case 'Home':
+                    e.preventDefault();
+                    languagePopup.querySelector('li:first-child button').focus();
+                    break;
+                case 'End':
+                    e.preventDefault();
+                    languagePopup.querySelector('li:last-child button').focus();
+                    break;
+            }
+       });
+    }
 })();
 
 (function sidebar() {
